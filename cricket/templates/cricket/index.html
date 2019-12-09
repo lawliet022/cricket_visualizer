@@ -1,0 +1,141 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>pure css jquery dropdown with search</title>
+  <!-- <link rel="stylesheet" href="{% static 'style.css' %}"> -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div class="container">
+  <div class="main">
+    <h2>Select Match Details and Visualization<h2>
+      <div style="display:flex">
+        <div class="form-group" style="margin: auto 10px;">
+          <select onclick="getTeam1()" id="match_type" class="form-control">
+            <option value="">Match Type</option>
+            <option value="ODI">ODI</option>
+            <option value="T20">T20</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin: auto 10px;">
+          <select onclick="getTeam2()" class="form-control" id="team1">
+            <option value="">Team 1</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin: auto 10px;">
+          <select onclick="getDate()" class="form-control" id="team2">
+            <option value="">Team 2</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin: auto 10px;">
+          <select class="form-control" id="match_date">
+            <option value="">Match Date</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin: auto 10px;">
+            <select onclick="getData()" class="form-control" id="graph">
+              <option value="">Wicket vs Overs</option>
+              <option value="">Run vs Overs</option>
+            </select>
+          </div>
+      </div>
+  </div>
+  <div id="chartdiv" style="height:400px;width:300px; "></div>
+</div>
+<!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
+  <!-- <script  src="{% static 'script.js' %}"></script> -->
+  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
+  <script language="javascript" type="text/javascript" src="{% static 'src/jquery.min.js' %}"></script>
+  <script language="javascript" type="text/javascript" src="{% static 'src/jquery.jqplot.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'src/jquery.jqplot.css' %}" />
+  
+  <script>
+    // $.jqplot('chartdiv',  [[[]]]);
+
+    function getTeam1() {
+      match_type = $("#match_type").val();
+      $.get('get_team_1/', {"match_type": match_type},
+        function (data, textStatus, jqXHR) {
+          teams = data.data.teams
+          $('#team1').empty();
+          $('#team1').append($("<option></option>")
+                    .attr("value",'')
+                    .text("Team 1"));
+          for(let i=0;i<teams.length;i++) {
+            $('#team1').append($("<option></option>")
+                    .attr("value",teams[i])
+                    .text(teams[i])); 
+            // $("#team1").append(`<option value="${teams[i]}">${teams[i]}</option>`)
+          }
+      });
+    }
+
+    function getTeam2() {
+      match_type = $("#match_type").val();
+      team1 = $("#team1").val();
+      $.get('get_team_2/', {"match_type": match_type, "team1": team1},
+        function (data, textStatus, jqXHR) {
+          teams = data.data.teams
+          $('#team2').empty();
+          $('#team2').append($("<option></option>")
+                    .attr("value",'')
+                    .text("Team 2"));
+          for(let i=0;i<teams.length;i++) {
+            $('#team2').append($("<option></option>")
+                    .attr("value",teams[i])
+                    .text(teams[i])); 
+            // $("#team1").append(`<option value="${teams[i]}">${teams[i]}</option>`)
+          }
+      });
+    }
+
+    function getDate() {
+      match_type = $("#match_type").val();
+      team1 = $("#team1").val();
+      team2 = $("#team2").val();
+      $.get('get_match_date/', {"match_type": match_type, "team1": team1, "team2": team2},
+        function (data, textStatus, jqXHR) {
+          dates = data.data.dates
+          $('#match_date').empty();
+          $('#match_date').append($("<option></option>")
+                    .attr("value",'')
+                    .text("Match Date"));
+          for(let i=0;i<dates.length;i++) {
+            $('#match_date').append($("<option></option>")
+                    .attr("value",dates[i])
+                    .text(dates[i])); 
+            // $("#team1").append(`<option value="${teams[i]}">${teams[i]}</option>`)
+          }
+      });
+    }
+
+    function getData() {
+      match_type = $("#match_type").val()
+      let maxx = 50;
+      if(match_type == 'T20') {
+        maxx = 20;
+      }
+      $("#chartdiv").empty();
+      match_type = $("#match_type").val();
+      team1 = $("#team1").val();
+      team2 = $("#team2").val();
+      date = $("#match_date").val();
+      $.get('get_data/', {"match_type": match_type, "team1": team1, "team2": team2, "date": date},
+        function (data, textStatus, jqXHR) {
+          data = data.data
+          $.jqplot('chartdiv',  [data.team2], { title:'Exponential Line',
+            axes:{yaxis:{min:0, max:10, tickInterval: 1},
+                  xaxis:{min:0, max:maxx}},
+            series:[{color:'#5FAB78'}]
+          });
+          console.log(data)
+      });
+    }
+  </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
-  <title>pure css jquery dropdown with search</title>
+  <title>Cricket Visualizer</title>
   <!-- <link rel="stylesheet" href="{% static 'style.css' %}"> -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
@@ -43,7 +43,7 @@
           </div>
       </div>
   </div>
-  <div id="chartdiv" style="height:400px;width:300px; "></div>
+  <div id="chartdiv" style="height:600px;width:700px; "></div>
 </div>
 <!-- partial -->
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
@@ -128,10 +128,14 @@
       $.get('get_data/', {"match_type": match_type, "team1": team1, "team2": team2, "date": date},
         function (data, textStatus, jqXHR) {
           data = data.data
-          $.jqplot('chartdiv',  [data.team2], { title:'Exponential Line',
-            axes:{yaxis:{min:0, max:10, tickInterval: 1},
-                  xaxis:{min:0, max:maxx}},
-            series:[{color:'#5FAB78'}]
+          $.jqplot('chartdiv',  [data.team2,data.team1], { title:'Wicket vs Overs comparison',
+            axes:{yaxis:{min:0, max:15, tickInterval: 1,label:"Wickets"},
+                  xaxis:{min:0, max:maxx+10, label:"Overs"}},
+            // series:[{color:'#5FAB78'}]
+            series:[
+                {color: '#ff4466', lineWidth: 2, label:'good line',showLabel:true},
+                {color: '#000000', shadow: false, label:'bad line',showLabel:true}
+            ]
           });
           console.log(data)
       });

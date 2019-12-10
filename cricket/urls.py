@@ -10,4 +10,6 @@ urlpatterns = [
     re_path(r'^get_team_2/$', views.getTeam2),
     re_path(r'^get_match_date/$', views.getMatchDate),
     re_path(r'^get_data/$', views.getData),
+    re_path(r'^get_data2/$', views.getData2),
+    re_path(r'^get_data3/$', views.getData3),
 ]

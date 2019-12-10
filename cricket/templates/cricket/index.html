@@ -11,39 +11,53 @@
 <!-- partial:index.partial.html -->
 <div class="container">
   <div class="main">
-    <h2>Select Match Details and Visualization<h2>
+    <h2><center>Select Match Details and Visualization</center></h2>
       <div style="display:flex">
-        <div class="form-group" style="margin: auto 10px;">
+        <div class="form-group" style="margin: auto 30px;">
           <select onclick="getTeam1()" id="match_type" class="form-control">
             <option value="">Match Type</option>
             <option value="ODI">ODI</option>
             <option value="T20">T20</option>
           </select>
         </div>
-        <div class="form-group" style="margin: auto 10px;">
+        <div class="form-group" style="margin: auto 30px;">
           <select onclick="getTeam2()" class="form-control" id="team1">
             <option value="">Team 1</option>
           </select>
         </div>
-        <div class="form-group" style="margin: auto 10px;">
+        <div class="form-group" style="margin: auto 30px;">
           <select onclick="getDate()" class="form-control" id="team2">
             <option value="">Team 2</option>
           </select>
         </div>
-        <div class="form-group" style="margin: auto 10px;">
+        <div class="form-group" style="margin: auto 30px;">
           <select class="form-control" id="match_date">
             <option value="">Match Date</option>
           </select>
         </div>
-        <div class="form-group" style="margin: auto 10px;">
-            <select onclick="getData()" class="form-control" id="graph">
-              <option value="">Wicket vs Overs</option>
-              <option value="">Run vs Overs</option>
+        <div class="form-group" style="margin: auto 30px;">
+            <select onclick="checkPlot();" class="form-control" id="graph">
+              <option value="1">Wicket vs Overs</option>
+              <option value="2">Run vs Overs</option>
+              <option value="3">Score Distribution</option>
             </select>
           </div>
       </div>
   </div>
-  <div id="chartdiv" style="height:600px;width:700px; "></div>
+  <div style="height: 50px">
+
+  </div>
+  <div class="row">
+    <div class="col-md-8" id="chartdiv" style="height: 400px;margin-top: 50px;"></div>
+    <div class="col-md-4">
+      <div class="row-md-6" id="pie8" ></div>
+      <div class="row-md-6" id="pie9" ></div>
+    </div>
+  </div>
+  
+  
+  <!-- <div id="chartdiv2" style="height:600px;width:700px; "></div> -->
+
 </div>
 <!-- partial -->
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
@@ -52,12 +66,27 @@
   <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
   <script language="javascript" type="text/javascript" src="{% static 'src/jquery.min.js' %}"></script>
   <script language="javascript" type="text/javascript" src="{% static 'src/jquery.jqplot.js' %}"></script>
+  <script language="javascript" type="text/javascript" src="{% static 'src/plugins/jqplot.pieRenderer.js' %}"></script>
+  
   <link rel="stylesheet" type="text/css" href="{% static 'src/jquery.jqplot.css' %}" />
   
   <script>
     // $.jqplot('chartdiv',  [[[]]]);
+    function checkPlot() {
+      val = $("#graph").val();
+      console.log(val);
+      if (val == '1')
+        getData();
+      else if(val == '2')
+        getData2();
+      else 
+        getData3();
 
+    }
     function getTeam1() {
+      $("#chartdiv").empty();
+      $("#pie8").empty();
+      $("#pie9").empty();
       match_type = $("#match_type").val();
       $.get('get_team_1/', {"match_type": match_type},
         function (data, textStatus, jqXHR) {
@@ -76,6 +105,9 @@
     }
 
     function getTeam2() {
+      $("#chartdiv").empty();
+      $("#pie8").empty();
+      $("#pie9").empty();
       match_type = $("#match_type").val();
       team1 = $("#team1").val();
       $.get('get_team_2/', {"match_type": match_type, "team1": team1},
@@ -95,6 +127,9 @@
     }
 
     function getDate() {
+      $("#chartdiv").empty();
+      $("#pie8").empty();
+      $("#pie9").empty();
       match_type = $("#match_type").val();
       team1 = $("#team1").val();
       team2 = $("#team2").val();
@@ -120,6 +155,8 @@
       if(match_type == 'T20') {
         maxx = 20;
       }
+
+      // $("#chartdiv2").empty();
       $("#chartdiv").empty();
       match_type = $("#match_type").val();
       team1 = $("#team1").val();
@@ -132,14 +169,117 @@
             axes:{yaxis:{min:0, max:15, tickInterval: 1,label:"Wickets"},
                   xaxis:{min:0, max:maxx+10, label:"Overs"}},
             // series:[{color:'#5FAB78'}]
+            legend:{ show: true },
             series:[
-                {color: '#ff4466', lineWidth: 2, label:'good line',showLabel:true},
-                {color: '#000000', shadow: false, label:'bad line',showLabel:true}
+                {color: '#ff4466', lineWidth: 2, label:team2,showLabel:true},
+                {color: '#000000', shadow: false, label:team1,showLabel:true}
             ]
           });
           console.log(data)
       });
     }
+
+    function getData2() {
+      match_type = $("#match_type").val()
+      let maxx = 50;
+      if(match_type == 'T20') {
+        maxx = 20;
+      }
+      let maxy = 400;
+      if(match_type == 'T20'){
+        maxy = 300;
+      }
+      $("#chartdiv").empty();
+      // $("#chartdiv2").empty();
+      match_type = $("#match_type").val();
+      team1 = $("#team1").val();
+      team2 = $("#team2").val();
+      date = $("#match_date").val();
+      $.get('get_data2/', {"match_type": match_type, "team1": team1, "team2": team2, "date": date},
+        function (data, textStatus, jqXHR) {
+          data = data.data
+          $.jqplot('chartdiv',  [data.team2,data.team1], { title:'Runs vs Overs comparison',
+            axes:{yaxis:{min:0, max:maxy, tickInterval: 50,label:"Runs"},
+                  xaxis:{min:0, max:maxx+5, label:"Overs"}},
+            // series:[{color:'#5FAB78'}]
+            legend:{ show: true },
+            series:[
+                {color: '#ff4466', lineWidth: 2, label:team2,showLabel:true},
+                {color: '#000000', shadow: false, label:team1,showLabel:true}
+            ]
+          });
+          console.log(data)
+      });
+    }
+
+    function getData3() {
+      match_type = $("#match_type").val()
+      // $("#chartdiv").empty();
+      match_type = $("#match_type").val();
+      team1 = $("#team1").val();
+      team2 = $("#team2").val();
+      date = $("#match_date").val();
+      $.get('get_data3/', {"match_type": match_type, "team1": team1, "team2": team2, "date": date},
+        function (data, textStatus, jqXHR) {
+          data = data.data
+          console.log(data.team1,data.team2)
+          $.jqplot('pie8', [data.team1], {
+            title: team1 +'\'s Score Distribution',
+          grid: {
+              drawBorder: false, 
+              drawGridlines: false,
+              background: '#ffffff',
+              shadow:false
+          },
+          axesDefaults: {
+              
+          },
+          seriesDefaults:{
+              renderer:$.jqplot.PieRenderer,
+              rendererOptions: {
+                  showDataLabels: true
+              }
+          },
+          legend: {
+              show: true,
+              rendererOptions: {
+                  numberRows: 1
+              },
+              location: 's'
+          }
+        });
+
+        // 2nd team
+        $.jqplot('pie9', [data.team2], {
+          grid: {
+              drawBorder: false, 
+              drawGridlines: false,
+              background: '#ffffff',
+              shadow:false
+          },
+          axesDefaults: {
+              
+          },
+          seriesDefaults:{
+              renderer:$.jqplot.PieRenderer,
+              rendererOptions: {
+                  showDataLabels: true
+              }
+          },
+          legend: {
+              show: true,
+              rendererOptions: {
+                  numberRows: 1
+              },
+              location: 's'
+          },
+          title: team2 +'\'s Score Distribution'
+        });
+
+        });
+    }
+
+
   </script>
 </body>
 </html>
